@@ -18,5 +18,4 @@ printf("Number of lines = %d\n", nline);
 fclose(yyin);
 }
 
-
 C:\Users\bhavana\Pictures\Screenshots\chhar and word.png
