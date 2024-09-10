@@ -1,0 +1,63 @@
+%{
+#include <stdio.h>
+#include <regex.h>
+
+// Function to validate URLs using regex
+int validate_url(const char *url) {
+regex_t regex;
+int reti;
+
+// Regular expression for URL validation
+const char *pattern = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$";
+
+// Compile the regular expression
+reti = regcomp(&regex, pattern, REG_EXTENDED);
+if (reti) {
+    fprintf(stderr, "Could not compile regex\n");
+    return 0;
+}
+
+// Execute the regular expression
+reti = regexec(&regex, url, 0, NULL, 0);
+regfree(&regex);
+
+// Check if URL matches the pattern
+if (!reti) {
+    return 1; // URL is valid
+} else {
+    return 0; // URL is invalid
+}
+}
+%}
+
+%%
+(https?|ftp)://[^ \t\n]+ {
+if (validate_url(yytext)) {
+printf("Valid URL: %s\n", yytext);
+} else {
+printf("Invalid URL: %s\n", yytext);
+}
+}
+. ; // Ignore any other characters
+%%
+
+int main(int argc, char **argv) {
+// Check if input file is provided
+if (argc > 1) {
+FILE *file = fopen(argv[1], "r");
+if (!file) {
+perror(argv[1]);
+return 1;
+}
+yyin = file;
+}
+
+// Perform lexical analysis
+yylex();
+
+return 0;
+}
+
+int yywrap() {
+return 1;
+}
