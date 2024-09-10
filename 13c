@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <ctype.h>
+
+void countCharactersWordsLines(FILE *file, int *charCount, int *wordCount, int *lineCount) {
+int inWord = 0;
+char ch;
+
+*charCount = 0;
+*wordCount = 0;
+*lineCount = 0;
+
+while ((ch = fgetc(file)) != EOF) {
+    (*charCount)++;
+
+    if (ch == '\n') {
+        (*lineCount)++;
+    }
+
+    if (isspace(ch)) {
+        inWord = 0;
+    } else if (!inWord) {
+        inWord = 1;
+        (*wordCount)++;
+    }
+}
+
+// If the file doesn't end with a newline character, count the last line.
+if (ch != '\n' && *charCount > 0) {
+    (*lineCount)++;
+}
+}
+
+int main() {
+const char *filename = "input.txt";
+FILE *file = fopen(filename, "r");
+
+if (file == NULL) {
+    perror("Error opening file");
+    return 1;
+}
+
+int charCount, wordCount, lineCount;
+countCharactersWordsLines(file, &charCount, &wordCount, &lineCount);
+
+fclose(file);
+
+printf("Characters: %d\n", charCount);
+printf("Words: %d\n", wordCount);
+printf("Lines: %d\n", lineCount);
+
+return 0;
+}
