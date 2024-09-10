@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_EXPR_LEN 100
+#define MAX_TEMP_VARS 50
+
+typedef struct {
+char expression[MAX_EXPR_LEN];
+char tempVar[10];
+} SubExpr;
+
+SubExpr subExprTable[MAX_TEMP_VARS];
+int subExprCount = 0;
+int tempCount = 0;
+
+char* newTemp() {
+char* temp = (char*)malloc(10);
+snprintf(temp, 10, "t%d", tempCount++);
+return temp;
+}
+
+char* lookupOrAddSubExpr(char* expr) {
+int i;
+for ( i = 0; i < subExprCount; i++) {
+if (strcmp(subExprTable[i].expression, expr) == 0) {
+return subExprTable[i].tempVar;
+}
+}
+char* temp = newTemp();
+strcpy(subExprTable[subExprCount].expression, expr);
+strcpy(subExprTable[subExprCount].tempVar, temp);
+subExprCount++;
+return temp;
+}
+
+void optimizeExpression(char* expr) {
+char tempExpr[MAX_EXPR_LEN];
+int len = strlen(expr);
+int i = 0, j = 0;
+
+while (i < len) {
+    if (expr[i] == '(') {
+        int start = i;
+        int parentheses = 0;
+        do {
+            if (expr[i] == '(') parentheses++;
+            if (expr[i] == ')') parentheses--;
+            i++;
+        } while (i < len && parentheses > 0);
+        int end = i;
+
+        strncpy(tempExpr, expr + start, end - start);
+        tempExpr[end - start] = '\0';
+
+        char* temp = lookupOrAddSubExpr(tempExpr);
+        printf("%s = %s\n", temp, tempExpr);
+        expr[start] = '\0';
+        strcat(expr, temp);
+        strcat(expr, expr + end);
+        i = start + strlen(temp);
+    } else {
+        i++;
+    }
+}
+}
+
+int main() {
+char expr[MAX_EXPR_LEN];
+printf("Enter an arithmetic expression (fully parenthesized):\n");
+fgets(expr, MAX_EXPR_LEN, stdin);
+expr[strcspn(expr, "\n")] = '\0';
+
+printf("Optimizing expression: %s\n", expr);
+optimizeExpression(expr);
+printf("Optimized expression: %s\n", expr);
+
+return 0;
+}
