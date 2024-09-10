@@ -1,0 +1,29 @@
+%{
+#include <stdio.h>
+
+int vowel_count = 0;
+int consonant_count = 0;
+
+void print_results() {
+printf("Number of vowels: %d\n", vowel_count);
+printf("Number of consonants: %d\n", consonant_count);
+}
+%}
+
+%option noyywrap
+
+%%
+[aeiouAEIOU] { vowel_count++; }
+[a-zA-Z] { consonant_count++; }
+.|\n { /* Ignore other characters and new lines */ }
+%%
+
+int main() {
+printf("Enter a sentence: ");
+yylex();
+print_results();
+return 0;
+}
+
+int custom_yywrap() {
+return 1;
