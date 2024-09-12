@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_RULES 10
+#define MAX_LEN 20
+
+char productions[MAX_RULES][MAX_LEN];
+char new_productions[MAX_RULES * 2][MAX_LEN]; // Increased to accommodate potential new productions
+
+int num_productions = 0;
+
+void eliminate_left_factoring() {
+int i,j;
+for ( i = 0; i < num_productions; i++) {
+// Check for common prefixes with other productions
+for ( j = i + 1; j < num_productions; j++) {
+if (productions[i][0] == productions[j][0]) {
+// Find the common prefix length
+int k;
+for (k = 3; productions[i][k] != '\0' && productions[j][k] != '\0'; k++) {
+if (productions[i][k] != productions[j][k]) {
+break;
+}
+}
+
+            if (k > 3) {
+                // Found common prefix, introduce a new non-terminal
+                char new_non_terminal = productions[i][0] + 'A' - 'a';
+
+                // Update original productions
+                strcpy(new_productions[num_productions], productions[i]);
+                new_productions[num_productions][k] = new_non_terminal;
+                new_productions[num_productions][k + 1] = '\0';
+
+                strcpy(new_productions[num_productions + 1], productions[j]);
+                new_productions[num_productions + 1][k] = new_non_terminal;
+                new_productions[num_productions + 1][k + 1] = '\0';
+
+                num_productions += 2; // Two new productions added
+                return; // Start over to handle more left factoring
+            }
+        }
+    }
+}
+}
+
+void print_productions() {
+int i;
+printf("\nProductions after eliminating left factoring:\n");
+for ( i = 0; i < num_productions; i++) {
+printf("%s\n", new_productions[i]);
+}
+}
+
+int main() {
+char input[MAX_LEN];
+
+// Prompt user to enter productions
+printf("Enter grammar productions (e.g., A -> alpha | A beta, end with 'end'): \n");
+
+// Read productions until "end" is entered or maximum number of productions reached
+while (1) {
+    fgets(input, sizeof(input), stdin);
+
+    // Remove the newline character at the end of the input
+    input[strcspn(input, "\n")] = '\0';
+
+    if (strcmp(input, "end") == 0 || num_productions >= MAX_RULES) {
+        break;
+    }
+
+    strcpy(productions[num_productions], input);
+    num_productions++;
+}
+int i;
+printf("\nOriginal productions:\n");
+for (i = 0; i < num_productions; i++) {
+    printf("%s\n", productions[i]);
+}
+
+eliminate_left_factoring();
+
+print_productions();
+
+return 0;
+}
