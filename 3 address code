@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+const char *input;
+char lookahead;
+int tempCount = 0;
+
+void error(const char *msg) {
+fprintf(stderr, "Error: %s\n", msg);
+exit(1);
+}
+
+void nextToken() {
+lookahead = *input++;
+while (isspace(lookahead)) {
+lookahead = *input++;
+}
+}
+
+void match(char expected) {
+if (lookahead == expected) {
+nextToken();
+} else {
+char errorMsg[50];
+snprintf(errorMsg, sizeof(errorMsg), "Expected '%c', but found '%c'", expected, lookahead);
+error(errorMsg);
+}
+}
+
+char *newTemp() {
+char *temp = (char *)malloc(8);
+snprintf(temp, 8, "t%d", tempCount++);
+return temp;
+}
+
+char *factor(); // Forward declaration
+
+char *expr() {
+char *left = factor();
+while (lookahead == '+' || lookahead == '-') {
+char op = lookahead;
+match(lookahead);
+char *right = factor();
+char *temp = newTemp();
+printf("%s = %s %c %s\n", temp, left, op, right);
+left = temp;
+}
+return left;
+}
+
+char *factor() {
+char left = term();
+while (lookahead == '' || lookahead == '/') {
+char op = lookahead;
+match(lookahead);
+char *right = term();
+char *temp = newTemp();
+printf("%s = %s %c %s\n", temp, left, op, right);
+left = temp;
+}
+return left;
+}
+
+char *term() {
+char *left = primary();
+while (lookahead == '^') {
+match('^');
+char *right = primary();
+char *temp = newTemp();
+printf("%s = %s ^ %s\n", temp, left, right);
+left = temp;
+}
+return left;
+}
+
+char *primary() {
+char *result;
+if (lookahead == '(') {
+match('(');
+result = expr();
+match(')');
+} else if (isdigit(lookahead) || isalpha(lookahead)) {
+result = (char *)malloc(8);
+snprintf(result, 8, "%c", lookahead);
+nextToken();
+} else {
+error("Unexpected token in primary()");
+}
+return result;
+}
+
+void parse(const char *expression) {
+input = expression;
+nextToken();
+char *result = expr();
+if (lookahead != '\0') {
+error("Unexpected input after parsing complete");
+}
+printf("Result = %s\n", result);
+}
+
+int main() {
+const char expression = "a+b(c^d-e)^(f+g*h)-i";
+printf("Generating three-address code for expression: %s\n", expression);
+
+parse(expression);
+
+return 0;
+}
