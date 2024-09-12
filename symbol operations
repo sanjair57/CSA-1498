@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_ENTRIES 100
+
+typedef struct {
+char name[50];
+char type[20];
+int scope;
+} Symbol;
+
+Symbol symbol_table[MAX_ENTRIES];
+int num_entries = 0;
+
+void insert_symbol(char *name, char *type, int scope) {
+if (num_entries >= MAX_ENTRIES) {
+printf("Symbol table is full!\n");
+return;
+}
+
+int i;
+for (i = 0; i < num_entries; i++) {
+    if (strcmp(symbol_table[i].name, name) == 0) {
+        printf("Symbol %s already exists in the symbol table.\n", name);
+        return;
+    }
+}
+
+
+strcpy(symbol_table[num_entries].name, name);
+strcpy(symbol_table[num_entries].type, type);
+symbol_table[num_entries].scope = scope;
+num_entries++;
+printf("Symbol %s inserted successfully.\n", name);
+}
+
+// Function to lookup a symbol in the symbol table
+void lookup_symbol(char *name) {
+int i;
+for ( i = 0; i < num_entries; i++) {
+if (strcmp(symbol_table[i].name, name) == 0) {
+printf("Symbol found: Name=%s, Type=%s, Scope=%d\n", symbol_table[i].name, symbol_table[i].type, symbol_table[i].scope);
+return;
+}
+}
+printf("Symbol %s not found in the symbol table.\n", name);
+}
+
+void display_symbol_table() {
+printf("\nSymbol Table:\n");
+printf("Name\tType\tScope\n");
+printf("--------------------------\n");
+int i;
+for ( i = 0; i < num_entries; i++) {
+printf("%s\t%s\t%d\n", symbol_table[i].name, symbol_table[i].type, symbol_table[i].scope);
+}
+}
+
+int main() {
+int choice;
+char name[50], type[20];
+int scope;
+
+while (1) {
+    printf("\nSymbol Table Operations:\n");
+    printf("1. Insert Symbol\n");
+    printf("2. Lookup Symbol\n");
+    printf("3. Display Symbol Table\n");
+    printf("4. Exit\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            printf("Enter symbol name: ");
+            scanf("%s", name);
+            printf("Enter symbol type: ");
+            scanf("%s", type);
+            printf("Enter symbol scope: ");
+            scanf("%d", &scope);
+            insert_symbol(name, type, scope);
+            break;
+        case 2:
+            printf("Enter symbol name to lookup: ");
+            scanf("%s", name);
+            lookup_symbol(name);
+            break;
+        case 3:
+            display_symbol_table();
+            break;
+        case 4:
+            exit(0);
+        default:
+            printf("Invalid choice! Please try again.\n");
+    }
+}
+
+return 0;
+}
